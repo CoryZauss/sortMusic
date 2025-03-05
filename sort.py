@@ -24,7 +24,7 @@ for dirpath, _, filenames in os.walk(root):
                 print(f"Current File: {filename}")
                 
                 identified = identify(file_path)
-                print(f'***** SONG ID: {identified} *****')
+                print(f'IDENTIFIED CONTENTS: {identified}')
 
                 if identified.get('status') == 'success':
                     # TODO: need to check if song already exists before copying
