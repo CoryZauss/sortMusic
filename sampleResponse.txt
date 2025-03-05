@@ -1,0 +1,15 @@
+
+    {
+        'status': 'success', 
+        'result': {
+            'artist': 'Radiohead', 
+            'title': 'Creep', 
+            'album': 'Now!...Anglo Anthems', 
+            'release_date': '2012-03-13', 
+            'label': '(C) 2012 EMI Music México, S.A. de C.V.', 
+            'timecode': '03:51', 
+            'song_link': 'https://lis.tn/YastwG'
+         }
+    }
+    
+   

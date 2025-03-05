@@ -1,6 +1,7 @@
 import ctypes, sys
 import os
 import shutil
+import re
 from mutagen.mp3 import MP3
 from mutagen.easyid3  import EasyID3
 from mutagen.flac import FLAC
@@ -10,10 +11,16 @@ from identify_song import identify
 root  = r"E:\\test_sort"
 output = r"E:\\test_sorted"
 
+def sanitize_filename(filename):
+    # Replace invalid characters with an underscore (_)
+    filename =  re.sub(r'[<>:"/\\|?*]', '_', filename)
+    if not filename[-1].isalnum():
+        filename = filename[:-1]
+    return filename
+
 def sort(root, output):
 
     # root = input('enter path to music folder: ')
-
 
     extensions = ("mp3", "wav", "flac", "ogg", "aac", "m4a")
             
@@ -29,6 +36,7 @@ def sort(root, output):
                     
                     identified = identify(file_path)
                     
+                    # TODO NONETYPE ERRORS NOT TRIGGERING THE IF BLOCK, MOVES TO EXCEPTION
                     if identified is None:
                         print(f"Metadata identification failed for: {filename}")
                         #! try to guess from either meta data or leave alone ?
@@ -40,7 +48,10 @@ def sort(root, output):
                         shutil.copy(file_path, new_file_path)
 
                     elif identified.get('status') == 'success':
+                        print('Audio Match Found')
+
                         # TODO: need to check if song already exists before copying
+                        # TODO: PROMPT to replace or not
                         
                         result = identified.get('result', {})
                         title = result.get("title", "Unknown Title")
@@ -50,6 +61,9 @@ def sort(root, output):
                         trackNumber = result.get("trackNumber", "")
                         
                         track_name = f"{artist} - {title}"
+                        
+                        artist = sanitize_filename(artist)
+                        album = sanitize_filename(album)
                         
                         updatedFile = os.path.join(output)  # Base output folder
 
@@ -78,8 +92,8 @@ def sort(root, output):
                         modified.save()
                         print(f"SAVED: {track_name} to {output}")
                         
-                        #? for now output to new folder
-                        #? future: modify in place
+                        #^ for now output to new folder
+                        #^ future: modify in place ?
         
         
                 except Exception as e:
@@ -98,30 +112,17 @@ def is_admin():
         return False
 
 if is_admin():
-    sort(root, output)
+    try:
+        sort(root, output)
+        print("Sort Complete")
+    except Exception as e:
+        print(f"Failed to complete sort: {e}")
 else:
     # Re-run the program with admin rights
     ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, " ".join(sys.argv), None, 1)
 
 
+#^ FUTURE : COMPARE LIBRARIES > SHOW MISSED FILES > OPTION TO MOVE 
+#^ FILES THAT CANT BE SORTED SHIFTED TO END AND LET YOU RENAME MANUALLY 
 
-
-    ""
-    {'status': 'success', 
-     'result': {
-         'artist': 'Radiohead', 
-         'title': 'Creep', 
-         'album': 'Now!...Anglo Anthems', 
-         'release_date': '2012-03-13', 
-         'label': '(C) 2012 EMI Music México, S.A. de C.V.', 
-         'timecode': '03:51', 
-         'song_link': 'https://lis.tn/YastwG'
-         }}
-    
-    ""
-
-
-
-
-
-
+   
