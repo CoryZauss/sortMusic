@@ -46,9 +46,7 @@ def sort(root, output):
                         title = result.get("title", "Unknown Title")
                         artist = result.get("artist", "Unknown Artist")
                         album = result.get("album", "Unknown Album")
-                        release_date = result.get("release_date", "")
                         label = result.get("label", "")
-                        timecode = result.get("timecode", "")
                         trackNumber = result.get("trackNumber", "")
                         
                         track_name = f"{artist} - {title}"
@@ -68,18 +66,15 @@ def sort(root, output):
                         print(f"Copy Complete: {new_file_path}")
                         
                         if file_extension == ".flac" or file_extension == ".wav":
-                            modified = FLAC(updatedFile)
+                            modified = FLAC(new_file_path)
                         else:
-                            modified = EasyID3(updatedFile)
+                            modified = EasyID3(new_file_path)
                         
-
-                        modified["title"] = title
-                        modified["artist"] = artist
-                        modified["album"] =  album
-                        modified["release_date"] = release_date
-                        modified["label"] = label
-                        modified["timecode"] = timecode
-                        modified["trackNumber"] = trackNumber
+                        modified["title"] = title if title else "Unknown Title"
+                        modified["artist"] = artist if artist else "Unknown Artist"
+                        modified["album"] = album if album else "Unknown Album"
+                        modified["label"] = label if label else ""
+                        modified["trackNumber"] = trackNumber if trackNumber else ""
                         modified.save()
                         print(f"SAVED: {track_name} to {output}")
                         
