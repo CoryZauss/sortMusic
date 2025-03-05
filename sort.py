@@ -80,19 +80,8 @@ for dirpath, _, filenames in os.walk(root):
                     
                     #? for now output to new folder
                     #? future: modify in place
-                   
-                # else:
-                #     print(f"Metadata identification failed for: {filename}")
-                #     #! try to guess from either meta data or leave alone ?
-                #     # audio = MP3(file_path, ID3=ID3)
-                #     # artist = audio.get('TPE1', 'Unknown Artist')
-                #     # title = audio.get('TPE2', 'Unknown Title')
-                #     # print(artist, title)
-                #     new_file_path = os.path.join(output, filename)
-                    
-                #     shutil.copy(file_path, new_file_path)
+       
     
-        
             except Exception as e:
                 print(f"ERROR: {e}")
                 if identified is not None:
