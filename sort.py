@@ -1,6 +1,5 @@
 import os
 import shutil
-import shutil
 from mutagen.mp3 import MP3
 from mutagen.easyid3  import EasyID3
 from mutagen.flac import FLAC
@@ -21,14 +20,24 @@ for dirpath, _, filenames in os.walk(root):
         if filename.lower().endswith(extensions): 
             file_path = os.path.join(dirpath, filename) #! full file path 
             try:
+                print()
                 print(f"Current File: {filename}")
                 
                 identified = identify(file_path)
-                print(f'IDENTIFIED CONTENTS: {identified}')
+                
+                if identified is None:
+                    print(f"Metadata identification failed for: {filename}")
+                    #! try to guess from either meta data or leave alone ?
+                    # audio = MP3(file_path, ID3=ID3)
+                    # artist = audio.get('TPE1', 'Unknown Artist')
+                    # title = audio.get('TPE2', 'Unknown Title')
+                    # print(artist, title)
+                    new_file_path = os.path.join(output, filename)
+                    shutil.copy(file_path, new_file_path)
 
-                if identified.get('status') == 'success':
+                elif identified.get('status') == 'success':
                     # TODO: need to check if song already exists before copying
-                     
+                    
                     result = identified.get('result', {})
                     title = result.get("title", "Unknown Title")
                     artist = result.get("artist", "Unknown Artist")
@@ -41,18 +50,18 @@ for dirpath, _, filenames in os.walk(root):
                     track_name = f"{artist} - {title}"
                     
                     updatedFile = os.path.join(output)  # Base output folder
+
                     if artist:
                         updatedFile = os.path.join(updatedFile, artist)  # Create artist folder
                     if album:
                         updatedFile = os.path.join(updatedFile, album)  # Create album folder
 
                     os.makedirs(updatedFile, exist_ok=True)  # Create directories if they don't exist
-
-                    file_extension = os.path.splitext(filename)[1]
-
+                    file_extension = os.path.splitext(filename)[1] # get ext
                     new_file_path = os.path.join(updatedFile, f"{track_name}{file_extension}")  # Define the full path including the filename and extension
                     
                     shutil.copy(file_path, new_file_path) # copy to new file
+                    print(f"Copy Complete: {new_file_path}")
                     
                     if file_extension == ".flac" or file_extension == ".wav":
                         modified = FLAC(updatedFile)
@@ -65,29 +74,32 @@ for dirpath, _, filenames in os.walk(root):
                     modified["release_date"] = release_date
                     modified["label"] = label
                     modified["timecode"] = timecode
-
-                    os.rename(updatedFile, track_name)
+                    modified["trackNumber"] = trackNumber
                     modified.save()
                     print(f"SAVED: {track_name} to {output}")
                     
                     #? for now output to new folder
                     #? future: modify in place
                    
-                else:
-                    print(f"Metadata identification failed for: {filename}")
-                    #! try to guess from either meta data or leave alone ?
-                    # audio = MP3(file_path, ID3=ID3)
-                    # artist = audio.get('TPE1', 'Unknown Artist')
-                    # title = audio.get('TPE2', 'Unknown Title')
-                    # print(artist, title)
-                    new_file_path = os.path.join(output, filename)
+                # else:
+                #     print(f"Metadata identification failed for: {filename}")
+                #     #! try to guess from either meta data or leave alone ?
+                #     # audio = MP3(file_path, ID3=ID3)
+                #     # artist = audio.get('TPE1', 'Unknown Artist')
+                #     # title = audio.get('TPE2', 'Unknown Title')
+                #     # print(artist, title)
+                #     new_file_path = os.path.join(output, filename)
                     
-                    shutil.copy(file_path, new_file_path)
+                #     shutil.copy(file_path, new_file_path)
     
         
             except Exception as e:
                 print(f"ERROR: {e}")
-                print(f"Dictionary contents: {identified.result}")
+                if identified is not None:
+                    print(f"Dictionary contents: {identified.get('result')}")
+                else:
+                    print(f"No metadata found for the {filename}.")
+                print()
 
     ""
     {'status': 'success', 
